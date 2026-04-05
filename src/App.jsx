@@ -29,9 +29,9 @@ const LayoutContent = () => {
   return (
     <>
       {!hideLayout && <Header />}
-      
+      <ScrollToTop />
       <Routes>
-        <ScrollToTop />
+        
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         
