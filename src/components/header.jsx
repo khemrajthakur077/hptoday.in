@@ -12,34 +12,11 @@ const Header = () => {
     { name: "Services", path: "/services" }
   ];
 
-  // Keyframes wahi rahengi
-  const keyframes = `
-    @keyframes marquee {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(-100%, 0); }
-    }
-  `;
-
   return (
-    /* Header ko wrap karne wala div jo space lega */
-    <div className="h-[105px] md:h-[115px]"> 
+    /* Header height adjusted because top marquee is removed */
+    <div className="h-[70px] md:h-[85px]"> 
       <header className="w-full shadow-lg fixed top-0 left-0 z-50 font-sans bg-white">
-        <style>{keyframes}</style>
         
-        {/* --- TOP BAR (Marquee) --- */}
-        <div className="bg-red-600 text-white py-1.5 overflow-hidden flex items-center">
-          <div className="bg-red-700 px-4 py-1 flex items-center gap-2 font-bold uppercase text-[10px] md:text-xs italic z-10 shadow-md shrink-0">
-            <TrendingUp size={14} /> Breaking
-          </div>
-          <div className="whitespace-nowrap flex items-center text-sm font-medium w-full">
-            <div style={{ display: 'inline-block', paddingLeft: '100%', animation: 'marquee 25s linear infinite' }}>
-              <span className="mx-8 font-bold">Himachal Weather Update: Heavy rain alert in Mandi...</span>
-              <span className="mx-8">|</span>
-              <span className="mx-8 font-bold">HP Board Exam Results soon...</span>
-            </div>
-          </div>
-        </div>
-
         {/* --- MAIN NAVIGATION --- */}
         <div className="bg-white border-b-4 border-blue-800 px-4 md:px-8 py-3">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -65,23 +42,47 @@ const Header = () => {
 
             {/* Right Icons */}
             <div className="flex items-center space-x-2 md:space-x-4">
-              <Link to="/search" className="p-2 text-blue-900 hover:bg-gray-100 rounded-full transition">
-                <Search size={20} />
-              </Link>
+              
               
               <Link to="/admin-login" className="p-1.5 md:p-2 text-blue-900 border-2 border-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition shadow-sm">
                 <User size={18} strokeWidth={2.5} />
               </Link>
               
-              <button className="lg:hidden p-1 text-blue-900" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {/* MOBILE TOGGLE BUTTON */}
+              <button 
+                className="lg:hidden p-1 text-blue-900 z-50" 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
               </button>
             </div>
           </div>
         </div>
 
-        {/* --- MOBILE SIDEBAR --- */}
-        {/* ... (Sidebar code same rahega) ... */}
+        {/* --- MOBILE SIDEBAR (FIXED TOGGLE) --- */}
+        <div className={`fixed inset-0 bg-blue-950/95 z-40 lg:hidden transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="flex flex-col items-center justify-center h-full space-y-8">
+            {categories.map((item, index) => (
+              <Link 
+                key={index} 
+                to={item.path} 
+                className="text-white text-2xl font-black uppercase tracking-tighter hover:text-red-600 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.name}
+              </Link>
+            ))}
+            
+            {/* Additional Admin Link for Mobile */}
+            <Link 
+              to="/admin-login" 
+              className="mt-4 px-8 py-3 bg-red-600 text-white font-black rounded-full uppercase text-sm"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Admin Login
+            </Link>
+          </div>
+        </div>
       </header>
     </div>
   );

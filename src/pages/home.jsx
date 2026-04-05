@@ -1,28 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, MapPin, ArrowRight, TrendingUp, Share2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Navigation ke liye import
 import { supabase } from '../supabaseClient';
 
 const Home = () => {
   const [activeDistrict, setActiveDistrict] = useState("All");
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Navigate function initialize kiya
   
   const districts = ["All", "Mandi", "Shimla", "Kangra", "Kullu", "Hamirpur", "Solan", "Chamba", "Una"];
 
-  const fetchNews = async () => {
-    setLoading(true);
-    let query = supabase.from('news').select('*').order('created_at', { ascending: false });
+  // --- SHARE FUNCTION START ---
+  const handleShare = async (e, news) => {
+    e.stopPropagation(); // Card click event ko rokne ke liye taaki sirf share khule
+    const shareData = {
+      title: news.title,
+      text: news.title + "\n\nPadhein poori khabar HP Today par:\n",
+      url: `${window.location.origin}/news/${news.id}` // Dynamic URL for specific news
+    };
 
-    if (activeDistrict !== "All") {
-      query = query.eq('district', activeDistrict);
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        alert("Link copy kar liya gaya hai!");
+      }
+    } catch (err) {
+      console.log("Error sharing:", err);
     }
-
-    const { data, error } = await query;
-    if (!error) setNewsList(data || []);
-    setLoading(false);
   };
+  // --- SHARE FUNCTION END ---
 
+  // --- CORRECTED FETCH LOGIC WITHIN USEEFFECT ---
   useEffect(() => {
+    const fetchNews = async () => {
+      setLoading(true);
+      try {
+        let query = supabase.from('news').select('*').order('created_at', { ascending: false });
+
+        if (activeDistrict !== "All") {
+          query = query.eq('district', activeDistrict);
+        }
+
+        const { data, error } = await query;
+        if (!error) {
+          setNewsList(data || []);
+        } else {
+          console.error("Supabase error:", error);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchNews();
   }, [activeDistrict]);
 
@@ -35,18 +69,17 @@ const Home = () => {
   return (
     <div className="bg-slate-50 min-h-screen font-sans">
       
-      {/* 1. TOP BREAKING TICKER - UPDATED WITH FILTER */}
+      {/* 1. TOP BREAKING TICKER */}
       <div className="bg-blue-950 text-white py-3 overflow-hidden border-b-4 border-red-600">
         <div className="max-w-7xl mx-auto px-4 flex items-center">
           <span className="bg-red-600 px-3 py-1 text-[10px] font-black uppercase italic tracking-tighter mr-4 animate-pulse">Breaking</span>
           <div className="flex-1 overflow-hidden whitespace-nowrap">
             <marquee className="text-xs font-bold uppercase tracking-wide">
               {newsList
-                .filter(n => n.category === "Breaking News") // <--- FIX: Sirf Breaking News dikhegi
+                .filter(n => n.category === "Breaking News")
                 .map((n, i) => (
                   <span key={i} className="mr-10">● {n.title}</span>
                 ))}
-              {/* Fallback agar koi breaking news na ho */}
               {newsList.filter(n => n.category === "Breaking News").length === 0 && (
                 <span>● Himachal Pradesh ki taaza khabrein padhne ke liye jude rahein HP Today ke saath!</span>
               )}
@@ -59,7 +92,10 @@ const Home = () => {
         
         {/* 2. DYNAMIC HERO SECTION */}
         {!loading && heroNews && (
-          <div className="relative rounded-[2.5rem] overflow-hidden h-[500px] mb-12 shadow-2xl group cursor-pointer">
+          <div 
+            onClick={() => navigate(`/news/${heroNews.id}`)} // Hero Click Navigation
+            className="relative rounded-[2.5rem] overflow-hidden h-[500px] mb-12 shadow-2xl group cursor-pointer"
+          >
             <img 
               src={heroNews.image_url || 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1200'} 
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
@@ -76,9 +112,17 @@ const Home = () => {
               <p className="text-blue-100 text-sm md:text-lg max-w-2xl line-clamp-2 font-medium opacity-80 mb-6">
                 {heroNews.content}
               </p>
-              <button className="flex items-center gap-2 bg-white text-blue-950 px-6 py-3 rounded-2xl font-black uppercase text-xs hover:bg-red-600 hover:text-white transition-all shadow-xl">
-                Poori Khabar Padhein <ArrowRight size={16} />
-              </button>
+              <div className="flex items-center gap-4">
+                <button className="flex items-center gap-2 bg-white text-blue-950 px-6 py-3 rounded-2xl font-black uppercase text-xs hover:bg-red-600 hover:text-white transition-all shadow-xl">
+                  Poori Khabar Padhein <ArrowRight size={16} />
+                </button>
+                <button 
+                  onClick={(e) => handleShare(e, heroNews)} // Stop propagation used here
+                  className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white hover:bg-white hover:text-blue-950 transition-all border border-white/30"
+                >
+                  <Share2 size={20} />
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -117,7 +161,11 @@ const Home = () => {
             ))
           ) : (
             otherNews.map((news) => (
-              <div key={news.id} className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col">
+              <div 
+                key={news.id} 
+                onClick={() => navigate(`/news/${news.id}`)} // Grid News Click Navigation
+                className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col cursor-pointer"
+              >
                 <div className="relative h-60 overflow-hidden">
                   <img 
                     src={news.image_url || 'https://via.placeholder.com/600x400'} 
@@ -127,7 +175,10 @@ const Home = () => {
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-blue-950 text-[9px] font-black px-3 py-1.5 rounded-xl uppercase shadow-sm">
                     {news.district}
                   </div>
-                  <button className="absolute top-4 right-4 p-2 bg-black/20 backdrop-blur-md rounded-xl text-white hover:bg-red-600 transition">
+                  <button 
+                    onClick={(e) => handleShare(e, news)} // card click trigger na ho isliye e.stopPropagation handle kiya hai
+                    className="absolute top-4 right-4 p-2 bg-black/20 backdrop-blur-md rounded-xl text-white hover:bg-red-600 transition"
+                  >
                     <Share2 size={14} />
                   </button>
                 </div>

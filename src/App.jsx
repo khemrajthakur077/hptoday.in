@@ -3,32 +3,47 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import Home from "./pages/home";
 import Header from "./components/header";
 import Footer from "./components/footer";
-import JobPage from "./pages/jobs"; 
+import JobsList from './pages/JobList';
+import JobDetail from './pages/JobDetail';
 import TourismPage from "./pages/tourism";
 import RentalServices from "./pages/services";
 import BreakingNews from "./pages/BreakingNews"
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from './pages/AdminDashboard';
-// 1. ProtectedRoute import karein
 import ProtectedRoute from './components/ProtectedRoute'; 
+import NewsDetail from './pages/NewsDetail';
+import ManageJobs from './pages/ManageJobs';
+import AutoFetch from './pages/AutoFetch';
+import PostNews from './pages/PostNews';
+import ManageNews from './pages/ManageNews';
+import Overview from './pages/Overview';
+import ManageRooms from "./pages/ManageRooms";
 
 const LayoutContent = () => {
   const location = useLocation();
-  const hideLayout = ['/admin-login', '/admin-dashboard'].includes(location.pathname);
+
+  // Sabhi admin paths aur login page par header/footer hide hoga
+  const hideLayout = location.pathname.startsWith('/admin') || location.pathname === '/admin-login';
 
   return (
     <>
       {!hideLayout && <Header />}
       
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/jobs" element={<JobPage />} />
+        
+        {/* FIXED: Pehle sirf /jobs/:id tha, ab agar koi sirf /jobs kholga to bhi error nahi aayega */}
+        <Route path="/jobs" element={<JobsList />} />
+        <Route path="/jobs/:id" element={<JobDetail />} />
+        
         <Route path="/tourism" element={<TourismPage />} />
         <Route path="/services" element={<RentalServices />} />
         <Route path="/breaking-news" element={<BreakingNews />} />
         <Route path="/admin-login" element={<LoginPage />} />
+        <Route path="/news/:id" element={<NewsDetail />} />
         
-        {/* 2. Dashboard ko ProtectedRoute mein wrap kiya */}
+        {/* Admin Protected Routes */}
         <Route 
           path="/admin-dashboard" 
           element={
@@ -37,7 +52,60 @@ const LayoutContent = () => {
             </ProtectedRoute>
           } 
         />
+        
+        <Route 
+          path="/admin/overview" 
+          element={
+            <ProtectedRoute>
+              <Overview />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/manage-jobs" 
+          element={
+            <ProtectedRoute>
+              <ManageJobs />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/auto-fetch" 
+          element={
+            <ProtectedRoute>
+              <AutoFetch />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/post-news" 
+          element={
+            <ProtectedRoute>
+              <PostNews />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/manage-news" 
+          element={
+            <ProtectedRoute>
+              <ManageNews />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/manage-rooms" 
+          element={
+            <ProtectedRoute>
+              <ManageRooms />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
+
+      
 
       {!hideLayout && <Footer />}
     </>
