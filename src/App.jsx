@@ -18,6 +18,7 @@ import PostNews from './pages/PostNews';
 import ManageNews from './pages/ManageNews';
 import Overview from './pages/Overview';
 import ManageRooms from "./pages/ManageRooms";
+import ScrollToTop from './components/ScrollToTop';  //scroll to top component 
 
 const LayoutContent = () => {
   const location = useLocation();
@@ -30,6 +31,7 @@ const LayoutContent = () => {
       {!hideLayout && <Header />}
       
       <Routes>
+        <ScrollToTop />
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         
