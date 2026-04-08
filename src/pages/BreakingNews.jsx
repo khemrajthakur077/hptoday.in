@@ -3,24 +3,49 @@ import { useNavigate } from 'react-router-dom';
 import { Newspaper, Clock, Share2, TrendingUp, MapPin, ChevronRight } from 'lucide-react';
 import { supabase } from '../supabaseClient'; // Supabase import
 
+const slugify = (value) => {
+  if (!value) return '';
+  return value
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_–—]+/g, '-')
+    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const BreakingNews = () => {
+  const getNewsSlug = (item) => slugify(item?.title || item?.id || '');
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [newsCache, setNewsCache] = useState(null);
+  const [cacheTime, setCacheTime] = useState(0);
   const navigate = useNavigate();
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   // --- FETCH DATA FROM SUPABASE (FIXED LOGIC) ---
   useEffect(() => {
     const fetchBreakingNews = async () => {
+      if (newsCache && Date.now() - cacheTime < CACHE_DURATION) {
+        setNewsList(newsCache);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const { data, error } = await supabase
           .from('news')
-          .select('*')
+          .select('id, title, image_url, created_at, district, category')
           .eq('category', 'Breaking News')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(50);
 
         if (!error) {
           setNewsList(data || []);
+          setNewsCache(data || []);
+          setCacheTime(Date.now());
         } else {
           console.error("Error fetching breaking news:", error);
         }
@@ -37,10 +62,11 @@ const BreakingNews = () => {
   // --- SHARE FUNCTION ---
   const handleShare = async (e, news) => {
     e.stopPropagation(); // Card click event ko rokne ke liye
+    const newsSlug = getNewsSlug(news);
     const shareData = {
       title: news.title,
       text: `${news.title} - Padhein HP Today par`,
-      url: `${window.location.origin}/news/${news.id}`,
+      url: `${window.location.origin}/news/${newsSlug}`,
     };
 
     try {
@@ -96,7 +122,7 @@ const BreakingNews = () => {
               newsList.map((news) => (
                 <div 
                   key={news.id} 
-                  onClick={() => navigate(`/news/${news.id}`)}
+                  onClick={() => navigate(`/news/${getNewsSlug(news)}`)}
                   className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row group cursor-pointer"
                 >
                   {/* News Image */}
@@ -104,7 +130,8 @@ const BreakingNews = () => {
                     <img 
                       src={news.image_url || 'https://images.unsplash.com/photo-1541535650810-10d26f5c2abb?w=800'} 
                       alt={news.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
                     />
                     <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase animate-pulse">
                       Breaking
@@ -158,7 +185,7 @@ const BreakingNews = () => {
                 {newsList.slice(0, 5).map((n) => (
                    <li 
                     key={n.id} 
-                    onClick={() => navigate(`/news/${n.id}`)}
+                    onClick={() => navigate(`/news/${getNewsSlug(n)}`)}
                     className="border-b border-white/10 pb-4 cursor-pointer hover:text-yellow-400 transition"
                   >
                     <p className="text-xs font-bold opacity-60 uppercase">{n.district}</p>

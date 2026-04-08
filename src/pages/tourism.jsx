@@ -7,20 +7,20 @@ const TourismPage = () => {
 
   const destinations = [
     // --- MANDI REGION ---
-    { id: 1, name: "Baba Bhootnath Mandir", location: "Mandi Town", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&q=80&w=800", tag: "Mandi Special", rating: "5.0", desc: "Chhoti Kashi ka dil aur sabse purana Shiv mandir." },
-    { id: 2, name: "Prashar Lake", location: "Mandi", image: "https://images.unsplash.com/photo-1596230529625-7ee10f7b09b6?auto=format&fit=crop&q=80&w=800", tag: "Adventure", rating: "4.9", desc: "Tairta hua dweep aur Rishi Prashar ka pagoda mandir." },
-    { id: 3, name: "Rewalsar Lake", location: "Mandi", image: "https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3?auto=format&fit=crop&q=80&w=800", tag: "Mandi Special", rating: "4.8", desc: "Budhist Monasteries, Gurudwara aur Hindu mandiron ka sangam." },
-    { id: 4, name: "Shikari Devi", location: "Thunag, Mandi", image: "https://images.unsplash.com/photo-1621518177587-f823a31189d2?auto=format&fit=crop&q=80&w=800", tag: "Mandi Special", rating: "5.0", desc: "Chat-rahit mandir jahan barf kabhi murti par nahi tikti." },
+    { id: 1, name: "Baba Bhootnath Mandir", location: "Mandi Town", image: "https://temple.yatradham.org/public/Product/temple/temple_70atNaNM_202409161345020.jpg", tag: "Mandi Special", rating: "5.0", desc: "Chhoti Kashi ka dil aur sabse purana Shiv mandir." },
+    { id: 2, name: "Prashar Lake", location: "Mandi", image: "https://happygotrips.com/wp-content/uploads/2019/09/Prashar-Lake-Trek-Tour-1.jpg", tag: "Adventure", rating: "4.9", desc: "Tairta hua dweep aur Rishi Prashar ka pagoda mandir." },
+    { id: 3, name: "Rewalsar Lake", location: "Mandi", image: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhwvOjGQs3hvss6EIDJh4Me9m7WzajzOMcj2KPsear7L2lq32YDP36bLd-m6BgmicnZ0Urm0o9T0GVZz_2Ghj2w-28aXYznhjc52cYYYcjNBMqCbpuQ5qcls9mj3ccrd81L3J8zIBNrJHu3ZUZJiY7f4KeWamxFGri8LGtRrDqSWsS-IfG1tbgvymxHrwNd/s700/Rewalsar-2.jpeg", tag: "Mandi Special", rating: "4.8", desc: "Budhist Monasteries, Gurudwara aur Hindu mandiron ka sangam." },
+    { id: 4, name: "Shikari Devi", location: "Thunag, Mandi", image: "https://travellingslacker.com/wp-content/uploads/2017/07/Shikari-Devi-19-800x445.jpg", tag: "Mandi Special", rating: "5.0", desc: "Chat-rahit mandir jahan barf kabhi murti par nahi tikti." },
 
     // --- SHAKTIPEETHS ---
-    { id: 12, name: "Jwalamukhi Mandir", location: "Kangra", image: "https://images.unsplash.com/photo-1624571409412-1f22055ccc12?auto=format&fit=crop&q=80&w=800", tag: "Shaktipeeth", rating: "5.0", desc: "Dharti se nikalti akhand jyoti jo sadiyon se jal rahi hai." },
-    { id: 13, name: "Bajreshwari Devi", location: "Kangra Town", image: "https://images.unsplash.com/photo-1624571409412-1f22055ccc12?auto=format&fit=crop&q=80&w=800", tag: "Shaktipeeth", rating: "4.9", desc: "Kangra ka vishal aur pavitra shakti dham." },
-    { id: 14, name: "Baglamukhi Mandir", location: "Bankhandi", image: "https://images.unsplash.com/photo-1624571409412-1f22055ccc12?auto=format&fit=crop&q=80&w=800", tag: "Shaktipeeth", rating: "5.0", desc: "Peeli rang ki shakti, jahan mannat puri hoti hai." },
+    { id: 12, name: "Jwalamukhi Mandir", location: "Kangra", image: "https://mediaim.expedia.com/destination/2/a965282b8eacae1a4d4f3076bc332369.jpg", tag: "Shaktipeeth", rating: "5.0", desc: "Dharti se nikalti akhand jyoti jo sadiyon se jal rahi hai." },
+    { id: 13, name: "Bajreshwari Devi", location: "Kangra Town", image: "https://dynamic.tourtravelworld.com/hotspot-images/brajeshwari-devi-temple-4014.jpg", tag: "Shaktipeeth", rating: "4.9", desc: "Kangra ka vishal aur pavitra shakti dham." },
+    { id: 14, name: "Baglamukhi Mandir", location: "Bankhandi", image: "https://www.sacreddham.com/wp-content/uploads/2025/06/baglamukhi-devi-temple.webp", tag: "Shaktipeeth", rating: "5.0", desc: "Peeli rang ki shakti, jahan mannat puri hoti hai." },
 
     // --- OTHER FAMOUS PLACES ---
-    { id: 7, name: "Hadimba Devi", location: "Manali", image: "https://images.unsplash.com/photo-1605649516282-4c540aa65440?auto=format&fit=crop&q=80&w=800", tag: "Adventure", rating: "4.8", desc: "Dhungri Van Vihar ke beech lakdi ka adbhut mandir." },
-    { id: 15, name: "Key Monastery", location: "Spiti", image: "https://images.unsplash.com/photo-1581793745862-99f575440278?auto=format&fit=crop&q=80&w=800", tag: "Adventure", rating: "5.0", desc: "Pahadi ki choti par sthit duniya ki sabse sundar monastery." },
-    { id: 16, name: "Khajjiar", location: "Chamba", image: "https://images.unsplash.com/photo-1610448721566-47369c768e70?auto=format&fit=crop&q=80&w=800", tag: "Adventure", rating: "4.8", desc: "Himachal ka Mini-Switzerland." }
+    { id: 7, name: "Hadimba Devi", location: "Manali", image: "https://discoverkullumanali.in/wp-content/uploads/2015/07/Hidimba-Devi-Temple-Manali-800x530.jpg", tag: "Adventure", rating: "4.8", desc: "Dhungri Van Vihar ke beech lakdi ka adbhut mandir." },
+    { id: 15, name: "Key Monastery", location: "Spiti", image: "https://awalkintheworld.com/wp-content/uploads/2020/08/key-monastery-spiti-1200x675.jpg", tag: "Adventure", rating: "5.0", desc: "Pahadi ki choti par sthit duniya ki sabse sundar monastery." },
+    { id: 16, name: "Khajjiar", location: "Chamba", image: "https://www.theindia.co.in/blog/wp-content/uploads/2020/01/Khajjiar-feature-image-1200x900.jpg", tag: "Adventure", rating: "4.8", desc: "Himachal ka Mini-Switzerland." }
   ];
 
   const filteredPlaces = activeFilter === "All"
@@ -51,12 +51,18 @@ const TourismPage = () => {
             Discover the divine beauty of Dev Bhoomi through our curated collection of sacred sites and natural wonders
           </p>
           <div className="flex flex-col gap-3 px-4">
-            <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 min-h-[48px]">
-              Start Exploring
-            </button>
-            <button className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-6 py-3 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 min-h-[48px]">
-              Learn More
-            </button>
+           <button
+            onClick={() =>
+              window.scrollBy({
+                top: 900,
+                behavior: "smooth",
+              })
+            }
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 min-h-[48px]"
+          >
+            Start Exploring
+          </button>
+            
           </div>
         </div>
 
@@ -132,9 +138,17 @@ const TourismPage = () => {
                   <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
                     {place.desc}
                   </p>
-                  <button className="w-full bg-gray-900 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-emerald-600 transition-colors duration-300 text-sm sm:text-base min-h-[44px]">
-                    Explore Destination
-                  </button>
+                  <button
+  onClick={() =>
+    window.open(
+      "https://wa.me/918580881886?text=Want%20to%20explore%20himachal%20destination",
+      "_blank"
+    )
+  }
+  className="w-full bg-gray-900 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-emerald-600 transition-colors duration-300 text-sm sm:text-base min-h-[44px]"
+>
+  Explore Destination
+</button>
                 </div>
               </div>
             ))}
@@ -157,7 +171,14 @@ const TourismPage = () => {
           <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-90 leading-relaxed px-2">
             Do you know of a secret temple or breathtaking viewpoint? Send us your photos and stories to showcase the beauty of Himachal Pradesh.
           </p>
-          <button className="bg-white text-emerald-600 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg min-h-[48px]">
+          <button 
+          onClick={() =>
+    window.open(
+      "https://wa.me/918580881886?text=Want%20to%20explore%20himachal%20destination",
+      "_blank"
+    )
+  }
+          className="bg-white text-emerald-600 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg min-h-[48px]">
             Contact Us on WhatsApp
           </button>
         </div>

@@ -3,8 +3,21 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Share2, ExternalLink } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
+const slugify = (value) => {
+  if (!value) return '';
+  return value
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_–—]+/g, '-')
+    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const JobDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
+  const getJobSlug = (job) => slugify(job?.title || job?.id || '');
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [relatedJobs, setRelatedJobs] = useState([]);
@@ -13,20 +26,39 @@ const JobDetail = () => {
   useEffect(() => {
     const fetchJob = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('jobs').select('*').eq('id', id).maybeSingle();
-      if (!error) setJob(data);
+      let jobData = null;
+      const normalizedSlug = slug?.toString().toLowerCase();
+      const isId = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(normalizedSlug)
+        || /^[0-9]+$/.test(normalizedSlug);
 
-      const { data: related } = await supabase
-        .from('jobs').select('id, title, vacancy')
-        .neq('id', id).limit(3);
-      if (related) setRelatedJobs(related);
+      if (isId) {
+        const { data, error } = await supabase
+          .from('jobs').select('*').eq('id', normalizedSlug).maybeSingle();
+        if (!error && data) jobData = data;
+      }
+
+      if (!jobData) {
+        const { data, error } = await supabase
+          .from('jobs').select('*').limit(1000);
+        if (!error && data) {
+          jobData = data.find((item) => slugify(item?.title) === normalizedSlug);
+        }
+      }
+
+      if (jobData) {
+        setJob(jobData);
+        const { data: related } = await supabase
+          .from('jobs').select('id, title, vacancy');
+        if (related) {
+          setRelatedJobs(related.filter((r) => r.id !== jobData.id).slice(0, 3));
+        }
+      }
 
       setLoading(false);
     };
     fetchJob();
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [slug]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -219,7 +251,7 @@ const JobDetail = () => {
                 {relatedJobs.map((rj) => (
                   <Link
                     key={rj.id}
-                    to={`/jobs/${rj.id}`}
+                    to={`/jobs/${slugify(rj.title)}`}
                     className="block py-3 border-b border-gray-100 hover:bg-gray-50 transition-all px-1"
                   >
                     <p className="font-serif text-sm text-gray-800 leading-snug mb-1 line-clamp-2">

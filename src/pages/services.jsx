@@ -55,7 +55,7 @@ const RentalServices = () => {
       {/* HEADER */}
       <div className="max-w-7xl mx-auto px-4 mb-12 text-center">
         <h1 className="text-4xl md:text-6xl font-black text-blue-950 uppercase tracking-tighter italic">
-          Sundernagar <span className="text-red-600">Rentals</span>
+          Rental <span className="text-red-600">Rooms</span>
         </h1>
 
         <div className="mt-8 max-w-xl mx-auto relative">
@@ -102,12 +102,16 @@ const RentalServices = () => {
               </div>
 
               {/* Contact */}
-              <a 
-                href={`tel:${room.contact}`}
-                className="block mt-6 bg-blue-900 text-white py-2 rounded-lg text-center"
-              >
-                <Phone size={14}/> Contact
-              </a>
+             <a
+  href={`tel:${room.contact}`}
+  className="flex items-center justify-center gap-2 mt-6 bg-blue-900 text-white py-3 px-5 rounded-xl relative overflow-hidden group"
+>
+  <span className="absolute inset-0 bg-white opacity-10 group-hover:opacity-20 transition"></span>
+  <Phone size={16} className="relative z-10" />
+  <span className="relative z-10 font-semibold tracking-wide">
+    Contact
+  </span>
+</a>
             </div>
 
           </div>

@@ -3,15 +3,45 @@ import { Link } from 'react-router-dom';
 import { Calendar, MapPin, GraduationCap, Users } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
+const slugify = (value) => {
+  if (!value) return '';
+  return value
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_–—]+/g, '-')
+    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const JobsList = () => {
+  const getJobSlug = (job) => slugify(job?.title || job?.id || '');
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [jobCache, setJobCache] = useState(null);
+  const [cacheTime, setCacheTime] = useState(0);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   useEffect(() => {
     const fetchJobs = async () => {
+      if (jobCache && Date.now() - cacheTime < CACHE_DURATION) {
+        setJobs(jobCache);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
-        .from('jobs').select('*').order('created_at', { ascending: false });
-      if (!error) setJobs(data || []);
+        .from('jobs')
+        .select('id, title, vacancy, eligibility, location, description, end_date, created_at')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
+      if (!error) {
+        setJobs(data || []);
+        setJobCache(data || []);
+        setCacheTime(Date.now());
+      }
       setLoading(false);
     };
     fetchJobs();
@@ -60,7 +90,7 @@ const JobsList = () => {
                 <Calendar size={14}/> Last Date: {jobs[0].end_date || 'TBA'}
               </span>
               <Link
-                to={`/jobs/${jobs[0].id}`}
+                to={`/jobs/${getJobSlug(jobs[0])}`}
                 className="bg-white text-blue-950 px-6 py-3 rounded-2xl font-black uppercase text-sm hover:bg-red-600 hover:text-white transition-all"
               >
                 View Details →
@@ -89,7 +119,7 @@ const JobsList = () => {
                   <Calendar size={12}/> {job.end_date || 'TBA'}
                 </span>
                 <Link
-                  to={`/jobs/${job.id}`}
+                  to={`/jobs/${getJobSlug(job)}`}
                   className="bg-blue-950 text-white px-4 py-2 rounded-xl font-bold text-xs uppercase hover:bg-red-600 transition-all"
                 >
                   Apply →

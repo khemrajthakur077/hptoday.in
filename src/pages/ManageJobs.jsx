@@ -7,6 +7,18 @@ import {
   AlertCircle, CheckCircle2, Loader2, ExternalLink // 2. ExternalLink icon add kiya
 } from 'lucide-react';
 
+const slugify = (value) => {
+  if (!value) return '';
+  return value
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_–—]+/g, '-')
+    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const ManageJobs = () => {
   const navigate = useNavigate(); // Navigation hook
   const [jobs, setJobs] = useState([]);
@@ -276,7 +288,7 @@ const ManageJobs = () => {
                       <div className="flex gap-2">
                         {/* 3. VIEW BUTTON ADDED HERE */}
                         <button 
-                          onClick={() => window.open(`/jobs/${job.id}`, '_blank')}
+                          onClick={() => window.open(`/jobs/${slugify(job.title)}`, '_blank')}
                           className="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all"
                           title="View Live Page"
                         >

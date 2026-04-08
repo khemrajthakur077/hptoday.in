@@ -19,6 +19,7 @@ import ManageNews from './pages/ManageNews';
 import Overview from './pages/Overview';
 import ManageRooms from "./pages/ManageRooms";
 import ScrollToTop from './components/ScrollToTop';  //scroll to top component 
+import ImageManager from "./pages/ImageManager";
 
 const LayoutContent = () => {
   const location = useLocation();
@@ -37,13 +38,13 @@ const LayoutContent = () => {
         
         {/* FIXED: Pehle sirf /jobs/:id tha, ab agar koi sirf /jobs kholga to bhi error nahi aayega */}
         <Route path="/jobs" element={<JobsList />} />
-        <Route path="/jobs/:id" element={<JobDetail />} />
+        <Route path="/jobs/:slug" element={<JobDetail />} />
         
         <Route path="/tourism" element={<TourismPage />} />
         <Route path="/services" element={<RentalServices />} />
         <Route path="/breaking-news" element={<BreakingNews />} />
         <Route path="/admin-login" element={<LoginPage />} />
-        <Route path="/news/:id" element={<NewsDetail />} />
+        <Route path="/news/:slug" element={<NewsDetail />} />
         
         {/* Admin Protected Routes */}
         <Route 
@@ -102,6 +103,15 @@ const LayoutContent = () => {
           element={
             <ProtectedRoute>
               <ManageRooms />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/media" 
+          element={
+            <ProtectedRoute>
+              <ImageManager />
             </ProtectedRoute>
           } 
         />

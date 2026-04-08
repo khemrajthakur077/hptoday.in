@@ -3,7 +3,8 @@ import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Newspaper, LogOut, PlusCircle, 
-  UserCircle, Briefcase, Globe, Home, BarChart3, Menu, X
+  UserCircle, Briefcase, Globe, Home, BarChart3, Menu, X,
+  Image as ImageIcon // "Image" icon ko "ImageIcon" ke naam se import kiya
 } from 'lucide-react';
 
 // Existing Imports
@@ -14,6 +15,7 @@ import AutoFetch from './AutoFetch';
 import Overview from './Overview';
 import ManageRooms from './ManageRooms';
 import AnalyticsPage from './AnalyticsPage';
+import ImageManager from './ImageManager'; // Naya Page Import
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -86,6 +88,12 @@ const AdminDashboard = () => {
             <BarChart3 size={18}/> Analytics
           </button>
 
+          <p className="text-[9px] text-white/40 px-4 mt-4">Media & Gallery</p>
+          <button onClick={() => selectTab('media')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${activeTab === 'media' ? 'bg-red-600' : 'hover:bg-white/10'}`}>
+            <ImageIcon size={18}/> Manage Photos
+          </button>
+
           <p className="text-[9px] text-white/40 px-4 mt-4">News</p>
           <button onClick={() => selectTab('news')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${activeTab === 'news' ? 'bg-red-600' : 'hover:bg-white/10'}`}>
@@ -133,7 +141,7 @@ const AdminDashboard = () => {
               <Menu size={28} />
             </button>
             <h2 className="text-xl lg:text-2xl font-bold capitalize">
-              {activeTab}
+              {activeTab === 'media' ? 'Manage Photos' : activeTab}
             </h2>
           </div>
 
@@ -147,6 +155,7 @@ const AdminDashboard = () => {
         <div className="overflow-x-hidden">
           {activeTab === 'overview' && <Overview />}
           {activeTab === 'analytics' && <AnalyticsPage />}
+          {activeTab === 'media' && <ImageManager />} 
           {activeTab === 'news' && (
             <PostNews 
               user={user}

@@ -3,8 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, MapPin, ArrowLeft, Share2, Calendar } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
+const slugify = (value) => {
+  if (!value) return '';
+  return value
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_–—]+/g, '-')
+    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const NewsDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,15 +25,32 @@ const NewsDetail = () => {
   useEffect(() => {
     const fetchNewsDetail = async () => {
       setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('news')
-          .select('*')
-          .eq('id', id)
-          .single();
+      const normalizedSlug = slug?.toString().toLowerCase();
+      let newsData = null;
+      const isId = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(normalizedSlug)
+        || /^[0-9]+$/.test(normalizedSlug);
 
-        if (error) throw error;
-        setNews(data);
+      try {
+        if (isId) {
+          const { data, error } = await supabase
+            .from('news')
+            .select('*')
+            .eq('id', normalizedSlug)
+            .maybeSingle();
+          if (!error && data) newsData = data;
+        }
+
+        if (!newsData) {
+          const { data, error } = await supabase
+            .from('news')
+            .select('*')
+            .limit(1000);
+
+          if (error) throw error;
+          newsData = data?.find((item) => slugify(item?.title) === normalizedSlug);
+        }
+
+        setNews(newsData);
       } catch (error) {
         console.error("Error fetching news:", error.message);
       } finally {
@@ -31,7 +60,7 @@ const NewsDetail = () => {
 
     fetchNewsDetail();
     window.scrollTo(0, 0); // Page ke top par scroll karne ke liye
-  }, [id]);
+  }, [slug]);
 
   // --- FIXED SHARE FUNCTION ---
   const handleShare = async () => {
@@ -146,6 +175,7 @@ const NewsDetail = () => {
             src={news.image_url || 'https://via.placeholder.com/1200x800'} 
             className="w-full h-full min-h-[300px] md:max-h-[600px] object-cover" 
             alt={news.title}
+            loading="lazy"
             onError={(e) => { e.target.src = 'https://via.placeholder.com/1200x800?text=HP+Today+News'; }}
           />
         </div>

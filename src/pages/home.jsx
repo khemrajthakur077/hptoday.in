@@ -3,21 +3,43 @@ import { Clock, MapPin, ArrowRight, TrendingUp, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; // Navigation ke liye import
 import { supabase } from '../supabaseClient';
 
+const slugify = (value) => {
+  if (!value) return '';
+  return value
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_–—]+/g, '-')
+    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const Home = () => {
+  const getNewsSlug = (news) => slugify(news?.title || news?.id || '');
   const [activeDistrict, setActiveDistrict] = useState("All");
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [newsCache, setNewsCache] = useState({});
+  const [cacheTimes, setCacheTimes] = useState({});
   const navigate = useNavigate(); // Navigate function initialize kiya
   
   const districts = ["All", "Mandi", "Shimla", "Kangra", "Kullu", "Hamirpur", "Solan", "Chamba", "Una"];
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  const isCacheValid = (key) => {
+    const time = cacheTimes[key];
+    return time && Date.now() - time < CACHE_DURATION;
+  };
 
   // --- SHARE FUNCTION START ---
   const handleShare = async (e, news) => {
     e.stopPropagation(); // Card click event ko rokne ke liye taaki sirf share khule
+    const newsSlug = getNewsSlug(news);
     const shareData = {
       title: news.title,
       text: news.title + "\n\nPadhein poori khabar HP Today par:\n",
-      url: `${window.location.origin}/news/${news.id}` // Dynamic URL for specific news
+      url: `${window.location.origin}/news/${newsSlug}`
     };
 
     try {
@@ -33,12 +55,22 @@ const Home = () => {
   };
   // --- SHARE FUNCTION END ---
 
-  // --- CORRECTED FETCH LOGIC WITHIN USEEFFECT ---
   useEffect(() => {
     const fetchNews = async () => {
+      const cacheKey = `news_${activeDistrict}`;
+      
+      if (isCacheValid(cacheKey) && newsCache[cacheKey]) {
+        setNewsList(newsCache[cacheKey]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
-        let query = supabase.from('news').select('*').order('created_at', { ascending: false });
+        let query = supabase.from('news')
+          .select('id, title, content, image_url, created_at, district, category, is_featured')
+          .order('created_at', { ascending: false })
+          .limit(50);
 
         if (activeDistrict !== "All") {
           query = query.eq('district', activeDistrict);
@@ -46,7 +78,10 @@ const Home = () => {
 
         const { data, error } = await query;
         if (!error) {
-          setNewsList(data || []);
+          const newData = data || [];
+          setNewsList(newData);
+          setNewsCache({ ...newsCache, [cacheKey]: newData });
+          setCacheTimes({ ...cacheTimes, [cacheKey]: Date.now() });
         } else {
           console.error("Supabase error:", error);
         }
@@ -93,13 +128,14 @@ const Home = () => {
         {/* 2. DYNAMIC HERO SECTION */}
         {!loading && heroNews && (
           <div 
-            onClick={() => navigate(`/news/${heroNews.id}`)} // Hero Click Navigation
+            onClick={() => navigate(`/news/${getNewsSlug(heroNews)}`)} // Hero Click Navigation
             className="relative rounded-[2.5rem] overflow-hidden h-[500px] mb-12 shadow-2xl group cursor-pointer"
           >
             <img 
               src={heroNews.image_url || 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1200'} 
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
               alt="Hero"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-blue-950 via-transparent to-transparent opacity-90"></div>
             <div className="absolute bottom-10 left-10 right-10">
@@ -163,7 +199,7 @@ const Home = () => {
             otherNews.map((news) => (
               <div 
                 key={news.id} 
-                onClick={() => navigate(`/news/${news.id}`)} // Grid News Click Navigation
+                onClick={() => navigate(`/news/${getNewsSlug(news)}`)} // Grid News Click Navigation
                 className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col cursor-pointer"
               >
                 <div className="relative h-60 overflow-hidden">
@@ -171,6 +207,7 @@ const Home = () => {
                     src={news.image_url || 'https://via.placeholder.com/600x400'} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     alt={news.title}
+                    loading="lazy"
                   />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-blue-950 text-[9px] font-black px-3 py-1.5 rounded-xl uppercase shadow-sm">
                     {news.district}
