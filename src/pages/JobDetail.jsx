@@ -15,9 +15,32 @@ const slugify = (value) => {
     .replace(/^-+|-+$/g, '');
 };
 
+const setMetaTag = (name, content, type = 'name') => {
+  if (!content) return;
+  const selector = type === 'name' ? `meta[name="${name}"]` : `meta[property="${name}"]`;
+  let element = document.head.querySelector(selector);
+  if (!element) {
+    element = document.createElement('meta');
+    if (type === 'name') element.setAttribute('name', name);
+    else element.setAttribute('property', name);
+    document.head.appendChild(element);
+  }
+  element.setAttribute('content', content);
+};
+
+const setCanonical = (url) => {
+  if (!url) return;
+  let link = document.head.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', url);
+};
+
 const JobDetail = () => {
   const { slug } = useParams();
-  const getJobSlug = (job) => slugify(job?.title || job?.id || '');
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [relatedJobs, setRelatedJobs] = useState([]);
@@ -59,6 +82,24 @@ const JobDetail = () => {
     fetchJob();
     window.scrollTo(0, 0);
   }, [slug]);
+
+  useEffect(() => {
+    if (!job) return;
+    const title = `${job.title} | HP Today`;
+    const description = (job.description || job.title)?.slice(0, 150).replace(/\s+/g, ' ') || 'Explore government jobs and recruitment updates for Himachal Pradesh on HP Today.';
+    const url = `${window.location.origin}${window.location.pathname}`;
+
+    document.title = title;
+    setMetaTag('description', description);
+    setMetaTag('og:title', title, 'property');
+    setMetaTag('og:description', description, 'property');
+    setMetaTag('og:image', 'https://hptoday.in/favicon.svg', 'property');
+    setMetaTag('og:url', url, 'property');
+    setMetaTag('twitter:card', 'summary_large_image');
+    setMetaTag('twitter:title', title);
+    setMetaTag('twitter:description', description);
+    setCanonical(url);
+  }, [job]);
 
   const handleShare = () => {
     if (navigator.share) {

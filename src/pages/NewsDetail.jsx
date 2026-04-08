@@ -15,6 +15,30 @@ const slugify = (value) => {
     .replace(/^-+|-+$/g, '');
 };
 
+const setMetaTag = (name, content, type = 'name') => {
+  if (!content) return;
+  const selector = type === 'name' ? `meta[name="${name}"]` : `meta[property="${name}"]`;
+  let element = document.head.querySelector(selector);
+  if (!element) {
+    element = document.createElement('meta');
+    if (type === 'name') element.setAttribute('name', name);
+    else element.setAttribute('property', name);
+    document.head.appendChild(element);
+  }
+  element.setAttribute('content', content);
+};
+
+const setCanonical = (url) => {
+  if (!url) return;
+  let link = document.head.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', url);
+};
+
 const NewsDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -61,6 +85,25 @@ const NewsDetail = () => {
     fetchNewsDetail();
     window.scrollTo(0, 0); // Page ke top par scroll karne ke liye
   }, [slug]);
+
+  useEffect(() => {
+    if (!news) return;
+
+    const title = `${news.title} | HP Today`;
+    const description = (news.content || news.title)?.slice(0, 150).replace(/\s+/g, ' ') || 'Read the latest Himachal Pradesh news on HP Today.';
+    const url = `${window.location.origin}${window.location.pathname}`;
+
+    document.title = title;
+    setMetaTag('description', description);
+    setMetaTag('og:title', title, 'property');
+    setMetaTag('og:description', description, 'property');
+    setMetaTag('og:image', news.image_url || 'https://hptoday.in/favicon.svg', 'property');
+    setMetaTag('og:url', url, 'property');
+    setMetaTag('twitter:card', 'summary_large_image');
+    setMetaTag('twitter:title', title);
+    setMetaTag('twitter:description', description);
+    setCanonical(url);
+  }, [news]);
 
   // --- FIXED SHARE FUNCTION ---
   const handleShare = async () => {

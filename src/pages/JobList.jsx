@@ -46,7 +46,7 @@ const JobsList = () => {
     };
     fetchJobs();
     window.scrollTo(0, 0);
-  }, []);
+  }, [jobCache, cacheTime, CACHE_DURATION]);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
