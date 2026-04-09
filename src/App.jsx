@@ -44,7 +44,7 @@ const LayoutContent = () => {
         <Route path="/services" element={<RentalServices />} />
         <Route path="/breaking-news" element={<BreakingNews />} />
         <Route path="/admin-login" element={<LoginPage />} />
-        <Route path="/news/:slug" element={<NewsDetail />} />
+        <Route path="/news/:slug/:id" element={<NewsDetail />} />
         
         {/* Admin Protected Routes */}
         <Route 

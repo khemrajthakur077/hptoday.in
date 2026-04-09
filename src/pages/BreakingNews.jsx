@@ -1,32 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Newspaper, Clock, Share2, TrendingUp, MapPin, ChevronRight } from 'lucide-react';
-import { supabase } from '../supabaseClient'; // Supabase import
+import { Clock, Share2, TrendingUp, ChevronRight } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
+// Slugify function remains the same
 const slugify = (value) => {
   if (!value) return '';
   return value
     .toString()
-    .toLowerCase()
     .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[\s_–—]+/g, '-')
-    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/[^\w\u0900-\u097F-]+/g, '')
     .replace(/--+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
 
 const BreakingNews = () => {
-  const getNewsSlug = (item) => slugify(item?.title || item?.id || '');
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newsCache, setNewsCache] = useState(null);
   const [cacheTime, setCacheTime] = useState(0);
   const navigate = useNavigate();
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  // --- FETCH DATA FROM SUPABASE (FIXED LOGIC) ---
+  // getNewsSlug ko useCallback mein wrap kiya taaki dependencies stable rahein
+  const getNewsSlug = useCallback((item) => {
+    const slug = slugify(item?.title || '');
+    return slug && item?.id ? `${slug}/${item.id}` : item?.id || '';
+  }, []);
+
+  // --- FETCH DATA FROM SUPABASE ---
   useEffect(() => {
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
     const fetchBreakingNews = async () => {
+      // Caching logic
       if (newsCache && Date.now() - cacheTime < CACHE_DURATION) {
         setNewsList(newsCache);
         setLoading(false);
@@ -43,11 +53,12 @@ const BreakingNews = () => {
           .limit(50);
 
         if (!error) {
-          setNewsList(data || []);
-          setNewsCache(data || []);
+          const fetchedData = data || [];
+          setNewsList(fetchedData);
+          setNewsCache(fetchedData);
           setCacheTime(Date.now());
         } else {
-          console.error("Error fetching breaking news:", error);
+          console.error("Error fetching breaking news:", error.message);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -57,11 +68,12 @@ const BreakingNews = () => {
     };
 
     fetchBreakingNews();
-  }, []); // Run only once on mount
+    // Dependencies added to satisfy ESLint rules
+  }, [newsCache, cacheTime]); 
 
   // --- SHARE FUNCTION ---
   const handleShare = async (e, news) => {
-    e.stopPropagation(); // Card click event ko rokne ke liye
+    e.stopPropagation();
     const newsSlug = getNewsSlug(news);
     const shareData = {
       title: news.title,
@@ -114,7 +126,6 @@ const BreakingNews = () => {
           
           <div className="lg:col-span-2 space-y-8">
             {loading ? (
-              // Loading Skeleton
               Array(3).fill(0).map((_, i) => (
                 <div key={i} className="h-56 bg-gray-200 animate-pulse rounded-3xl"></div>
               ))
@@ -125,7 +136,6 @@ const BreakingNews = () => {
                   onClick={() => navigate(`/news/${getNewsSlug(news)}`)}
                   className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row group cursor-pointer"
                 >
-                  {/* News Image */}
                   <div className="md:w-72 h-56 relative overflow-hidden shrink-0">
                     <img 
                       src={news.image_url || 'https://images.unsplash.com/photo-1541535650810-10d26f5c2abb?w=800'} 
@@ -138,7 +148,6 @@ const BreakingNews = () => {
                     </div>
                   </div>
 
-                  {/* News Details */}
                   <div className="p-6 flex flex-col justify-between flex-1">
                     <div>
                       <div className="flex items-center gap-3 text-gray-400 text-[10px] font-black uppercase tracking-wider mb-3">
@@ -174,7 +183,6 @@ const BreakingNews = () => {
             )}
           </div>
 
-          {/* Right Sidebar */}
           <div className="space-y-8">
             <div className="bg-blue-950 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-900/30">
               <div className="flex items-center gap-2 mb-6">

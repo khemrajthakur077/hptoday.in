@@ -7,10 +7,12 @@ const slugify = (value) => {
   if (!value) return '';
   return value
     .toString()
-    .toLowerCase()
     .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[\s_–—]+/g, '-')
-    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/[^\w\u0900-\u097F-]+/g, '')
     .replace(/--+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
@@ -49,7 +51,9 @@ const NewsDetail = () => {
   useEffect(() => {
     const fetchNewsDetail = async () => {
       setLoading(true);
-      const normalizedSlug = slug?.toString().toLowerCase();
+      // URL decode the slug first, then normalize it using the same slugify logic as the listing pages
+      const decodedSlug = decodeURIComponent(slug || '');
+      const normalizedSlug = slugify(decodedSlug);
       let newsData = null;
       const isId = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(normalizedSlug)
         || /^[0-9]+$/.test(normalizedSlug);
@@ -71,7 +75,11 @@ const NewsDetail = () => {
             .limit(1000);
 
           if (error) throw error;
-          newsData = data?.find((item) => slugify(item?.title) === normalizedSlug);
+          
+          newsData = data?.find((item) => {
+            const itemSlug = slugify(item?.title || item?.id);
+            return itemSlug === normalizedSlug || item?.id === normalizedSlug || item?.id === decodedSlug;
+          });
         }
 
         setNews(newsData);

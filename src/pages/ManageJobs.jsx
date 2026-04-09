@@ -14,7 +14,7 @@ const slugify = (value) => {
     .toLowerCase()
     .trim()
     .replace(/[\s_–—]+/g, '-')
-    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/[^\w\u0900-\u097F]+/g, '') // Allow word characters and Devanagari script
     .replace(/--+/g, '-')
     .replace(/^-+|-+$/g, '');
 };

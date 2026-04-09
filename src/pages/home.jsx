@@ -1,59 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Clock, MapPin, ArrowRight, TrendingUp, Share2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // Navigation ke liye import
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 
 const slugify = (value) => {
   if (!value) return '';
   return value
     .toString()
-    .toLowerCase()
     .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[\s_–—]+/g, '-')
-    .replace(/[^a-z0-9-]+/g, '')
+    .replace(/[^\w\u0900-\u097F-]+/g, '')
     .replace(/--+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
 
 const Home = () => {
-  const getNewsSlug = (news) => slugify(news?.title || news?.id || '');
   const [activeDistrict, setActiveDistrict] = useState("All");
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newsCache, setNewsCache] = useState({});
   const [cacheTimes, setCacheTimes] = useState({});
-  const navigate = useNavigate(); // Navigate function initialize kiya
+  const navigate = useNavigate();
   
   const districts = ["All", "Mandi", "Shimla", "Kangra", "Kullu", "Hamirpur", "Solan", "Chamba", "Una"];
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  const isCacheValid = (key) => {
+  // getNewsSlug with Hybrid Logic (Slug + ID)
+  const getNewsSlug = useCallback((news) => {
+    const slug = slugify(news?.title || '');
+    return slug && news?.id ? `${slug}/${news.id}` : news?.id || '';
+  }, []);
+
+  // Memoized cache validation to satisfy ESLint
+  const isCacheValid = useCallback((key) => {
     const time = cacheTimes[key];
     return time && Date.now() - time < CACHE_DURATION;
-  };
+  }, [cacheTimes, CACHE_DURATION]);
 
-  // --- SHARE FUNCTION START ---
+  // --- SHARE FUNCTION ---
   const handleShare = async (e, news) => {
-    e.stopPropagation(); // Card click event ko rokne ke liye taaki sirf share khule
-    const newsSlug = getNewsSlug(news);
+    e.stopPropagation();
+    const newsPath = getNewsSlug(news);
     const shareData = {
       title: news.title,
-      text: news.title + "\n\nPadhein poori khabar HP Today par:\n",
-      url: `${window.location.origin}/news/${newsSlug}`
+      text: `${news.title}\n\nPadhein poori khabar HP Today par:\n`,
+      url: `${window.location.origin}/news/${newsPath}`
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
         alert("Link copy kar liya gaya hai!");
       }
     } catch (err) {
-      console.log("Error sharing:", err);
+      console.error("Error sharing:", err);
     }
   };
-  // --- SHARE FUNCTION END ---
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -80,10 +87,10 @@ const Home = () => {
         if (!error) {
           const newData = data || [];
           setNewsList(newData);
-          setNewsCache({ ...newsCache, [cacheKey]: newData });
-          setCacheTimes({ ...cacheTimes, [cacheKey]: Date.now() });
+          setNewsCache(prev => ({ ...prev, [cacheKey]: newData }));
+          setCacheTimes(prev => ({ ...prev, [cacheKey]: Date.now() }));
         } else {
-          console.error("Supabase error:", error);
+          console.error("Supabase error:", error.message);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -93,13 +100,11 @@ const Home = () => {
     };
 
     fetchNews();
-  }, [activeDistrict]);
+  }, [activeDistrict, isCacheValid, newsCache]); // Corrected dependencies
 
-  // --- FEATURED LOGIC START ---
   const featuredNews = newsList.find(n => n.is_featured === true);
   const heroNews = featuredNews || newsList[0];
   const otherNews = newsList.filter(n => n.id !== heroNews?.id);
-  // --- FEATURED LOGIC END ---
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans">
@@ -128,7 +133,7 @@ const Home = () => {
         {/* 2. DYNAMIC HERO SECTION */}
         {!loading && heroNews && (
           <div 
-            onClick={() => navigate(`/news/${getNewsSlug(heroNews)}`)} // Hero Click Navigation
+            onClick={() => navigate(`/news/${getNewsSlug(heroNews)}`)}
             className="relative rounded-[2.5rem] overflow-hidden h-[500px] mb-12 shadow-2xl group cursor-pointer"
           >
             <img 
@@ -142,7 +147,7 @@ const Home = () => {
               <span className="bg-red-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase mb-4 inline-block shadow-lg">
                 {heroNews.is_featured ? '⭐ Mukhya Samachar' : 'Latest Update'}
               </span>
-              <h1 className="text-3xl md:text-5xl font-black text-white leading-tight mb-4 drop-shadow-lg">
+              <h1 className="text-2xl md:text-5xl font-black text-white leading-tight mb-4 drop-shadow-lg">
                 {heroNews.title}
               </h1>
               <p className="text-blue-100 text-sm md:text-lg max-w-2xl line-clamp-2 font-medium opacity-80 mb-6">
@@ -153,7 +158,7 @@ const Home = () => {
                   Poori Khabar Padhein <ArrowRight size={16} />
                 </button>
                 <button 
-                  onClick={(e) => handleShare(e, heroNews)} // Stop propagation used here
+                  onClick={(e) => handleShare(e, heroNews)}
                   className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white hover:bg-white hover:text-blue-950 transition-all border border-white/30"
                 >
                   <Share2 size={20} />
@@ -199,12 +204,12 @@ const Home = () => {
             otherNews.map((news) => (
               <div 
                 key={news.id} 
-                onClick={() => navigate(`/news/${getNewsSlug(news)}`)} // Grid News Click Navigation
+                onClick={() => navigate(`/news/${getNewsSlug(news)}`)}
                 className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col cursor-pointer"
               >
                 <div className="relative h-60 overflow-hidden">
                   <img 
-                    src={news.image_url || 'https://via.placeholder.com/600x400'} 
+                    src={news.image_url || 'https://via.placeholder.com/600x400?text=HP+Today'} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     alt={news.title}
                     loading="lazy"
@@ -213,7 +218,7 @@ const Home = () => {
                     {news.district}
                   </div>
                   <button 
-                    onClick={(e) => handleShare(e, news)} // card click trigger na ho isliye e.stopPropagation handle kiya hai
+                    onClick={(e) => handleShare(e, news)}
                     className="absolute top-4 right-4 p-2 bg-black/20 backdrop-blur-md rounded-xl text-white hover:bg-red-600 transition"
                   >
                     <Share2 size={14} />
@@ -243,7 +248,6 @@ const Home = () => {
           )}
         </div>
 
-        {/* EMPTY STATE */}
         {!loading && newsList.length === 0 && (
           <div className="text-center py-20 bg-white rounded-[3rem] border-4 border-dashed border-gray-100">
             <h3 className="text-2xl font-black text-gray-300 uppercase">Is zila ki khabrein jaldi aayengi!</h3>

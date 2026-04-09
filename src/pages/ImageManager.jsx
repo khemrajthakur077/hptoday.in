@@ -7,6 +7,7 @@ const supabase = createClient('https://vpyjwoprsncmgxkdiqij.supabase.co', 'sb_pu
 export default function ImageDashboard() {
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState([]);
+  const [copiedId, setCopiedId] = useState(null); // Copy status track karne ke liye
 
   // 1. Fetch Images from Bucket
   const fetchImages = async () => {
@@ -35,7 +36,7 @@ export default function ImageDashboard() {
       if (uploadError) throw uploadError;
 
       alert('Photo upload ho gayi!');
-      fetchImages(); // List refresh karne ke liye
+      fetchImages();
     } catch (error) {
       alert('Upload fail: ' + error.message);
     } finally {
@@ -54,6 +55,13 @@ export default function ImageDashboard() {
     } else {
       setImages(images.filter((img) => img.name !== fileName));
     }
+  };
+
+  // 4. Copy to Clipboard Function
+  const copyToClipboard = (url, id) => {
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000); // 2 second baad text wapas change ho jayega
   };
 
   return (
@@ -76,16 +84,34 @@ export default function ImageDashboard() {
         {images.map((img) => {
           const publicUrl = supabase.storage.from('images').getPublicUrl(img.name).data.publicUrl;
           return (
-            <div key={img.id} className="border p-2 rounded relative">
+            <div key={img.id} className="border p-2 rounded relative flex flex-col bg-white shadow-sm">
               <img src={publicUrl} alt="uploaded" className="w-full h-40 object-cover rounded" />
-              <div className="mt-2 text-xs truncate">{publicUrl}</div>
               
-              <button 
-                onClick={() => deleteImage(img.name)}
-                className="mt-2 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-              >
-                Delete Photo
-              </button>
+              {/* Link Section with Break-all */}
+              <div className="mt-2 text-[10px] bg-gray-50 p-2 rounded break-all border border-gray-200">
+                <span className="font-bold block mb-1 text-gray-600">Image URL:</span>
+                {publicUrl}
+              </div>
+              
+              <div className="flex gap-2 mt-3">
+                {/* Copy Button */}
+                <button 
+                  onClick={() => copyToClipboard(publicUrl, img.id)}
+                  className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                    copiedId === img.id ? 'bg-green-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  {copiedId === img.id ? 'Copied!' : 'Copy Link'}
+                </button>
+
+                {/* Delete Button */}
+                <button 
+                  onClick={() => deleteImage(img.name)}
+                  className="px-3 py-1.5 bg-red-500 text-white rounded text-sm font-medium hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           );
         })}
