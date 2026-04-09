@@ -1,4 +1,6 @@
 import fs from "fs";
+import path from "path";
+import process from "process";
 import { createClient } from "@supabase/supabase-js";
 
 const baseUrl = process.env.SITE_URL || "https://hptoday.in";
@@ -12,6 +14,9 @@ const publicPages = [
 const supabaseUrl = "https://vpyjwoprsncmgxkdiqij.supabase.co";
 const supabaseAnonKey = "sb_publishable_KcC3MV5XJpEzCk9wdP0KLQ_CRMiUWQM";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+const publicDir = path.resolve(process.cwd(), "public");
+const distDir = path.resolve(process.cwd(), "dist");
 
 const slugify = (value) => {
   if (!value) return "";
@@ -104,13 +109,21 @@ ${entries.map(makeEntry).join("")}
 
 </urlset>`;
 
-const writeSitemap = (sitemapXml) => {
-  fs.writeFileSync("./public/sitemap.xml", sitemapXml, "utf8");
+const writeFile = (filename, content) => {
+  const targetPath = path.join(publicDir, filename);
+  fs.writeFileSync(targetPath, content, "utf8");
+
+  if (fs.existsSync(distDir)) {
+    const distPath = path.join(distDir, filename);
+    fs.writeFileSync(distPath, content, "utf8");
+  }
 };
+
+const writeSitemap = (sitemapXml) => writeFile("sitemap.xml", sitemapXml);
 
 const writeRobotsTxt = () => {
   const robots = `User-agent: *\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`;
-  fs.writeFileSync("./public/robots.txt", robots, "utf8");
+  writeFile("robots.txt", robots);
 };
 
 const main = async () => {
