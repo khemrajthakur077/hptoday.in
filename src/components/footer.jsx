@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   // State for Email Input
@@ -48,14 +49,52 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Column 2: Categories */}
-        <div>
-          <h3 className="text-lg font-bold mb-4 text-red-500 uppercase text-xs tracking-widest">Khabrein</h3>
-          <ul className="text-gray-300 space-y-2 text-sm font-medium">
-            <li className="hover:text-white cursor-pointer transition">Himachal News</li>
-            <li className="hover:text-white cursor-pointer transition">Government Jobs</li>
-          </ul>
-        </div>
+       {/* Column 2: Categories */}
+<div>
+  <h3 className="text-lg font-bold mb-4 text-red-500 uppercase text-xs tracking-widest">Khabrein</h3>
+  <ul className="text-gray-300 space-y-2 text-sm font-medium">
+    <li className="hover:text-white cursor-pointer transition">Himachal News</li>
+    <li className="hover:text-white cursor-pointer transition">Government Jobs</li>
+  </ul>
+
+  {/* ✅ Added Pages Links */}
+  {/* ✅ Updated with React Router Links */}
+<h3 className="text-lg font-bold mt-6 mb-4 text-red-500 uppercase text-xs tracking-widest">Important Links</h3>
+<ul className="text-gray-300 space-y-2 text-sm font-medium">
+  <li>
+    <Link 
+      to="/privacy-policy" 
+      className="hover:text-white transition-all duration-200 hover:underline"
+    >
+      Privacy Policy
+    </Link>
+  </li>
+  <li>
+    <Link 
+      to="/terms-conditions" 
+      className="hover:text-white transition-all duration-200 hover:underline"
+    >
+      Terms & Conditions
+    </Link>
+  </li>
+  <li>
+    <Link 
+      to="/about" 
+      className="hover:text-white transition-all duration-200 hover:underline"
+    >
+      About Us
+    </Link>
+  </li>
+  <li>
+    <Link 
+      to="/contact" 
+      className="hover:text-white transition-all duration-200 hover:underline"
+    >
+      Contact Us
+    </Link>
+  </li>
+</ul>
+</div>
 
         {/* Column 3: Contact */}
         <div>

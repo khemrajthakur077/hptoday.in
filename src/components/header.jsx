@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Search, Bell, TrendingUp, User } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
@@ -9,11 +9,12 @@ const Header = () => {
     { name: "Breaking News", path: "/breaking-news" },
     { name: "Jobs", path: "/jobs" },
     { name: "Tourism", path: "/tourism" },
-    { name: "Services", path: "/services" }
+    { name: "Services", path: "/services" },
+    { name: "About Us", path: "/about" },
+    { name: "Contact Us", path: "/contact" }
   ];
 
   return (
-    /* Header height adjusted because top marquee is removed */
     <div className="h-[70px] md:h-[85px]"> 
       <header className="w-full shadow-lg fixed top-0 left-0 z-50 font-sans bg-white">
         
@@ -42,15 +43,15 @@ const Header = () => {
 
             {/* Right Icons */}
             <div className="flex items-center space-x-2 md:space-x-4">
-              
-              
               <Link to="/admin-login" className="p-1.5 md:p-2 text-blue-900 border-2 border-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition shadow-sm">
                 <User size={18} strokeWidth={2.5} />
               </Link>
               
-              {/* MOBILE TOGGLE BUTTON */}
+              {/* MOBILE TOGGLE BUTTON - Color Change Logic Added Here */}
               <button 
-                className="lg:hidden p-1 text-blue-900 z-50" 
+                className={`lg:hidden p-1 z-50 transition-colors duration-300 ${
+                  isMenuOpen ? 'text-white' : 'text-blue-900'
+                }`} 
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -59,9 +60,9 @@ const Header = () => {
           </div>
         </div>
 
-        {/* --- MOBILE SIDEBAR (FIXED TOGGLE) --- */}
+        {/* --- MOBILE SIDEBAR --- */}
         <div className={`fixed inset-0 bg-blue-950/95 z-40 lg:hidden transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          <div className="flex flex-col items-center justify-center h-full space-y-8">
+          <div className="flex flex-col items-center justify-center h-full space-y-6">
             {categories.map((item, index) => (
               <Link 
                 key={index} 
@@ -73,7 +74,6 @@ const Header = () => {
               </Link>
             ))}
             
-            {/* Additional Admin Link for Mobile */}
             <Link 
               to="/admin-login" 
               className="mt-4 px-8 py-3 bg-red-600 text-white font-black rounded-full uppercase text-sm"

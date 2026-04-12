@@ -20,6 +20,11 @@ import Overview from './pages/Overview';
 import ManageRooms from "./pages/ManageRooms";
 import ScrollToTop from './components/ScrollToTop';  //scroll to top component 
 import ImageManager from "./pages/ImageManager";
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import SocialSidebar from './components/SocialSidebar';
 
 const LayoutContent = () => {
   const location = useLocation();
@@ -31,6 +36,7 @@ const LayoutContent = () => {
     <>
       {!hideLayout && <Header />}
       <ScrollToTop />
+      <SocialSidebar />
       <Routes>
         
         {/* Public Routes */}
@@ -45,6 +51,14 @@ const LayoutContent = () => {
         <Route path="/breaking-news" element={<BreakingNews />} />
         <Route path="/admin-login" element={<LoginPage />} />
         <Route path="/news/:slug/:id" element={<NewsDetail />} />
+         {/* Legal Pages */}
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
+          
+          {/* Static Pages */}
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+
         
         {/* Admin Protected Routes */}
         <Route 
