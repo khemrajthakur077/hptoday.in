@@ -4,7 +4,7 @@ import { Send, Image as ImageIcon, MapPin, Tag, Loader2 } from 'lucide-react';
 
 const PostNews = ({ user, onPublishSuccess, initialData }) => { // 2. initialData prop liya
   const categories = ["Breaking News", "Taza Khabar", "Politics", "Sports", "Entertainment"];
-  const districts = ["Mandi", "Shimla", "Kangra", "Kullu", "Hamirpur", "Solan", "Chamba", "Una", "Bilaspur", "Sirmaur", "Kinnaur", "Lahaul-Spiti"];
+  const districts = ["All", "Mandi", "Shimla", "Kangra", "Kullu", "Hamirpur", "Solan", "Chamba", "Una", "Bilaspur", "Sirmaur", "Kinnaur", "Lahaul-Spiti"];
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

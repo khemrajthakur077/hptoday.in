@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. Navigate import kiya
 import { supabase } from '../supabaseClient';
 import { 
   PlusCircle, Pencil, Trash2, Save, X, 
   Briefcase, GraduationCap, MapPin, Calendar, Link as LinkIcon,
-  AlertCircle, CheckCircle2, Loader2, ExternalLink // 2. ExternalLink icon add kiya
+  AlertCircle, CheckCircle2, Loader2, ExternalLink
 } from 'lucide-react';
 
 const slugify = (value) => {
@@ -14,19 +13,17 @@ const slugify = (value) => {
     .toLowerCase()
     .trim()
     .replace(/[\s_–—]+/g, '-')
-    .replace(/[^\w\u0900-\u097F]+/g, '') // Allow word characters and Devanagari script
+    .replace(/[^\w\u0900-\u097F]+/g, '')
     .replace(/--+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
 
 const ManageJobs = () => {
-  const navigate = useNavigate(); // Navigation hook
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // Form State
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -38,7 +35,6 @@ const ManageJobs = () => {
     pdf_url: ''
   });
 
-  // Data Fetch Karna
   const fetchJobs = async () => {
     setLoading(true);
     try {
@@ -60,7 +56,6 @@ const ManageJobs = () => {
     fetchJobs();
   }, []);
 
-  // Form Submit (Add or Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -126,7 +121,6 @@ const ManageJobs = () => {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20 font-sans">
-      {/* Header Section */}
       <div className="bg-blue-950 text-white pt-12 pb-20 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
@@ -144,7 +138,6 @@ const ManageJobs = () => {
       <div className="max-w-6xl mx-auto px-6 -mt-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           
-          {/* LEFT: Editor Form */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-blue-900/10 border border-gray-100">
               <div className="flex items-center justify-between mb-8">
@@ -262,7 +255,6 @@ const ManageJobs = () => {
             </div>
           </div>
 
-          {/* RIGHT: Active List */}
           <div className="space-y-6">
             <h3 className="text-xl font-black text-blue-950 uppercase flex items-center gap-3 px-2">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -286,26 +278,18 @@ const ManageJobs = () => {
                         <span className="text-xs font-bold text-red-600">{job.end_date || 'N/A'}</span>
                       </div>
                       <div className="flex gap-2">
-                        {/* 3. VIEW BUTTON ADDED HERE */}
                         <button 
                           onClick={() => window.open(`/jobs/${slugify(job.title)}`, '_blank')}
                           className="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all"
-                          title="View Live Page"
                         >
                           <ExternalLink size={18} />
                         </button>
 
-                        <button 
-                          onClick={() => handleEdit(job)}
-                          className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all"
-                        >
+                        <button onClick={() => handleEdit(job)} className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all">
                           <Pencil size={18} />
                         </button>
                         
-                        <button 
-                          onClick={() => handleDelete(job.id)}
-                          className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-600 hover:text-white transition-all"
-                        >
+                        <button onClick={() => handleDelete(job.id)} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-600 hover:text-white transition-all">
                           <Trash2 size={18} />
                         </button>
                       </div>
