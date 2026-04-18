@@ -36,7 +36,7 @@ const LayoutContent = () => {
     <>
       {!hideLayout && <Header />}
       <ScrollToTop />
-      <SocialSidebar />
+      {!hideLayout && <SocialSidebar />}
       <Routes>
         
         {/* Public Routes */}
